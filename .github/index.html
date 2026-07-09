@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pa" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rajni Flour Mills ERP | ਰਾਜਨੀ ਫਲੋਰ ਮਿਲਜ਼</title>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <div class="brand">
+      <span class="brand-logo">🌾</span>
+      <div class="brand-text">
+        <h1>Rajni Flour Mills</h1>
+        <p>ਰਾਜਨੀ ਫਲੋਰ ਮਿਲਜ਼ • ERP System</p>
+      </div>
+    </div>
+    
+    <div class="header-controls">
+      <!-- Sync Status Indicator -->
+      <div class="sync-indicator" id="syncIndicator">
+        <span class="indicator-dot dot-red" id="syncDot"></span>
+        <span id="syncText">Connecting...</span>
+      </div>
+      
+      <!-- Live Date & Time -->
+      <div class="time-display" id="liveTime">00:00:00</div>
+      
+      <!-- Dark/Light Theme Button -->
+      <button class="btn btn-secondary btn-icon" id="themeToggle" title="Toggle Theme">
+        <i data-lucide="sun"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main>
+    
+    <!-- 0. DASHBOARD HOME VIEW -->
+    <div id="dashboardView" class="view-panel active">
+      <div class="glass-card" style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; font-weight: 700;">Welcome to Rajni Flour Mills ERP</h2>
+        <p style="color: var(--text-muted);">Please select a section to manage mill operations</p>
+      </div>
+      
+      <div class="dashboard-grid">
+        <!-- Tile 1: New Entry -->
+        <div class="tile" onclick="switchView('newEntry')">
+          <span class="tile-icon">📝</span>
+          <h3 class="tile-title">New Entry</h3>
+          <p class="tile-title" style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-bottom: 0.5rem;">ਨਵੀਂ ਐਂਟਰੀ</p>
+          <p class="tile-desc">Log new grinding materials entering the mill and set expected delivery date.</p>
+        </div>
+        
+        <!-- Tile 2: Under Process -->
+        <div class="tile" onclick="switchView('underProcess')">
+          <span class="tile-badge" id="badgeUnderProcess" style="display: none;">0</span>
+          <span class="tile-icon">⚙️</span>
+          <h3 class="tile-title">Under Process</h3>
+          <p class="tile-title" style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-bottom: 0.5rem;">ਪ੍ਰੋਸੈਸ ਅਧੀਨ</p>
+          <p class="tile-desc">View and manage orders sorted by material categories currently in process.</p>
+        </div>
+        
+        <!-- Tile 3: Completed (Payment Pending) -->
+        <div class="tile" onclick="switchView('completed')">
+          <span class="tile-badge" id="badgeCompleted" style="display: none;">0</span>
+          <span class="tile-icon">✅</span>
+          <h3 class="tile-title">Completed Orders</h3>
+          <p class="tile-title" style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-bottom: 0.5rem;">ਪੂਰੇ ਹੋਏ ਆਰਡਰ</p>
+          <p class="tile-desc">Manage completed orders awaiting payment collection and final dispatch.</p>
+        </div>
+        
+        <!-- Tile 4: Reports -->
+        <div class="tile" onclick="switchView('reports')">
+          <span class="tile-icon">📊</span>
+          <h3 class="tile-title">Reports & Income</h3>
+          <p class="tile-title" style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-bottom: 0.5rem;">ਰਿਪੋਰਟਾਂ ਅਤੇ ਕਮਾਈ</p>
+          <p class="tile-desc">Check processed material statistics, total earnings, and filter logs by month or date range.</p>
+        </div>
+        
+        <!-- Tile 5: Database & Sync -->
+        <div class="tile" onclick="switchView('dataSync')">
+          <span class="tile-icon">💾</span>
+          <h3 class="tile-title">Data Sync</h3>
+          <p class="tile-title" style="font-size: 0.95rem; font-weight: normal; color: var(--text-muted); margin-bottom: 0.5rem;">ਡਾਟਾ ਬੈਕਅਪ</p>
+          <p class="tile-desc">Manage manual database sync, backup download, restoration, and troubleshooting.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. NEW ENTRY VIEW -->
+    <div id="newEntryView" class="view-panel">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i data-lucide="edit-3" style="color: var(--primary);"></i> New Grinding Entry / ਨਵੀਂ ਐਂਟਰੀ</h2>
+          <button class="btn btn-secondary" onclick="switchView('dashboard')"><i data-lucide="arrow-left"></i> Home</button>
+        </div>
+        
+        <form id="newEntryForm">
+          <div class="form-grid">
+            <!-- Queue Number -->
+            <div class="form-group">
+              <label for="queueNumber">Order / Queue Number (ਕਤਾਰ ਨੰਬਰ) *</label>
+              <input type="number" id="queueNumber" class="input-control" required placeholder="e.g. 101">
+            </div>
+            
+            <!-- Date Time -->
+            <div class="form-group">
+              <label for="dateTime">Entry Date & Time (ਤਾਰੀਖ ਅਤੇ ਸਮਾਂ) *</label>
+              <input type="datetime-local" id="dateTime" class="input-control" required>
+            </div>
+            
+            <!-- Customer Name -->
+            <div class="form-group">
+              <label for="customerName">Customer Name (ਗਾਹਕ ਦਾ ਨਾਮ) *</label>
+              <input type="text" id="customerName" class="input-control" required placeholder="Enter customer name">
+            </div>
+            
+            <!-- Village -->
+            <div class="form-group">
+              <label for="village">Village (ਪਿੰਡ) *</label>
+              <input type="text" id="village" class="input-control" required placeholder="Enter village name">
+            </div>
+            
+            <!-- Contact Number -->
+            <div class="form-group">
+              <label for="contactNumber">Contact Number (ਮੋਬਾਈਲ ਨੰਬਰ)</label>
+              <input type="tel" id="contactNumber" class="input-control" placeholder="10-digit phone number" pattern="[0-9]{10}">
+            </div>
+            
+            <!-- Material Selection -->
+            <div class="form-group">
+              <label for="material">Material (ਸਮੱਗਰੀ) *</label>
+              <select id="material" class="input-control" required onchange="toggleCustomMaterialInput()">
+                <option value="">-- Select Material --</option>
+                <option value="Kanak">Wheat (ਕਣਕ)</option>
+                <option value="Makki">Maize (ਮੱਕੀ)</option>
+                <option value="Chawal">Rice (ਚਾਵਲ)</option>
+                <option value="Bajra">Millet (ਬਾਜਰਾ)</option>
+                <option value="Saro">Mustard Seeds (ਸਰੋਂ)</option>
+                <option value="Haldi">Turmeric (ਹਲਦੀ)</option>
+                <option value="Other">Other / custom (ਹੋਰ)</option>
+              </select>
+            </div>
+
+            <!-- Custom Material (Hidden initially) -->
+            <div class="form-group" id="customMaterialGroup" style="display: none;">
+              <label for="customMaterial">Specify Material (ਹੋਰ ਸਮੱਗਰੀ ਦਾ ਨਾਂ) *</label>
+              <input type="text" id="customMaterial" class="input-control" placeholder="Specify other material">
+            </div>
+            
+            <!-- Initial Weight -->
+            <div class="form-group">
+              <label for="initialWeight">Initial Weight in kg (ਸ਼ੁਰੂਆਤੀ ਵਜ਼ਨ) *</label>
+              <input type="number" step="0.001" id="initialWeight" class="input-control" required placeholder="e.g. 50.500">
+            </div>
+            
+            <!-- Expected Delivery Date -->
+            <div class="form-group">
+              <label for="deliveryDate">Delivery Date (ਸਪੁਰਦਗੀ ਦੀ ਮਿਤੀ) *</label>
+              <input type="date" id="deliveryDate" class="input-control" required>
+            </div>
+          </div>
+          
+          <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="resetNewEntryForm()">Reset</button>
+            <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Save Entry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. UNDER PROCESS VIEW -->
+    <div id="underProcessView" class="view-panel">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i data-lucide="settings" style="color: var(--primary);"></i> Under Process Orders / ਪ੍ਰੋਸੈਸ ਅਧੀਨ</h2>
+          <button class="btn btn-secondary" onclick="switchView('dashboard')"><i data-lucide="arrow-left"></i> Home</button>
+        </div>
+        
+        <!-- Category Overview -->
+        <div class="category-container" id="categoryGrid">
+          <!-- Populated via JS -->
+        </div>
+
+        <!-- Orders Details Section (Renders when a category card is clicked) -->
+        <div id="selectedCategorySection" style="display: none; margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 id="selectedCategoryTitle" style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">Details</h3>
+            <button class="btn btn-secondary" onclick="closeCategoryDetails()"><i data-lucide="x"></i> Close List</button>
+          </div>
+          
+          <div class="order-detail-list" id="underProcessOrdersList">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. COMPLETED VIEW (PAYMENT PENDING) -->
+    <div id="completedView" class="view-panel">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i data-lucide="check-circle" style="color: var(--primary);"></i> Completed (Payment Pending) / ਪੂਰੇ ਹੋਏ ਆਰਡਰ</h2>
+          <button class="btn btn-secondary" onclick="switchView('dashboard')"><i data-lucide="arrow-left"></i> Home</button>
+        </div>
+        
+        <div class="order-detail-list" id="completedOrdersList">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. REPORTS VIEW -->
+    <div id="reportsView" class="view-panel">
+      <!-- Summary Widgets -->
+      <div class="report-summary-grid">
+        <!-- Stat: Active Orders -->
+        <div class="stat-widget">
+          <div class="stat-label">Orders Pending Grinding (ਪ੍ਰੋਸੈਸ ਅਧੀਨ)</div>
+          <div class="stat-value" id="statPendingCount">0</div>
+        </div>
+        <!-- Stat: Completed Pending Payment -->
+        <div class="stat-widget">
+          <div class="stat-label">Awaiting Payment (ਪੇਮੈਂਟ ਬਾਕੀ)</div>
+          <div class="stat-value" style="color: var(--warning);" id="statCompletedCount">0</div>
+        </div>
+        <!-- Stat: Total Earnings -->
+        <div class="stat-widget">
+          <div class="stat-label">Total Earnings (ਕੁੱਲ ਕਮਾਈ)</div>
+          <div class="stat-value stat-value-success" id="statTotalEarnings">₹0.00</div>
+        </div>
+        <!-- Stat: Total Processed Weight -->
+        <div class="stat-widget">
+          <div class="stat-label">Total Ground Material (ਕੁੱਲ ਵਜ਼ਨ)</div>
+          <div class="stat-value" id="statTotalWeight">0.00 kg</div>
+        </div>
+      </div>
+
+      <!-- Filters & Detailed Table -->
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i data-lucide="bar-chart-2" style="color: var(--primary);"></i> Operations Reports / ਰਿਪੋਰਟਾਂ</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="exportReportToCSV()"><i data-lucide="download"></i> CSV Export</button>
+            <button class="btn btn-secondary" onclick="switchView('dashboard')"><i data-lucide="arrow-left"></i> Home</button>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="form-grid" style="margin-bottom: 2rem; background: rgba(0,0,0,0.1); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border-color);">
+          <!-- Preset Filter Mode -->
+          <div class="form-group">
+            <label for="reportFilterMode">Filter Mode (ਫਿਲਟਰ ਦਾ ਤਰੀਕਾ)</label>
+            <select id="reportFilterMode" class="input-control" onchange="toggleFilterModeInputs()">
+              <option value="all">Show All Records (ਸਾਰੇ ਰਿਕਾਰਡ)</option>
+              <option value="month">Select Month (ਮਹੀਨਾ ਚੁਣੋ)</option>
+              <option value="range">Date Range (ਤਾਰੀਖਾਂ ਦੀ ਰੇਂਜ)</option>
+            </select>
+          </div>
+
+          <!-- Month Selector -->
+          <div class="form-group" id="filterMonthGroup" style="display: none;">
+            <label for="filterMonth">Select Month & Year</label>
+            <input type="month" id="filterMonth" class="input-control" onchange="applyReportFilters()">
+          </div>
+
+          <!-- Date Range Picker -->
+          <div class="form-group" id="filterStartDateGroup" style="display: none;">
+            <label for="filterStartDate">Start Date (ਸ਼ੁਰੂਆਤੀ ਤਾਰੀਖ)</label>
+            <input type="date" id="filterStartDate" class="input-control" onchange="applyReportFilters()">
+          </div>
+          
+          <div class="form-group" id="filterEndDateGroup" style="display: none;">
+            <label for="filterEndDate">End Date (ਆਖਰੀ ਤਾਰੀਖ)</label>
+            <input type="date" id="filterEndDate" class="input-control" onchange="applyReportFilters()">
+          </div>
+        </div>
+
+        <!-- Material Category-wise Summary -->
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: 8px;">
+          Material Summary / ਸਮੱਗਰੀ ਅਨੁਸਾਰ ਵੇਰਵਾ
+        </h3>
+        <div class="table-wrapper" style="margin-bottom: 2.5rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Material (ਸਮੱਗਰੀ)</th>
+                <th>Total Processed Weight (ਕੁੱਲ ਵਜ਼ਨ)</th>
+                <th>Orders Count (ਕੁੱਲ ਆਰਡਰ)</th>
+                <th>Total Income (ਕੁੱਲ ਕਮਾਈ)</th>
+              </tr>
+            </thead>
+            <tbody id="materialSummaryTableBody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Detailed Transaction Log -->
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; border-left: 4px solid var(--primary); padding-left: 8px;">
+          Detailed Orders Log / ਵਿਸਤ੍ਰਿਤ ਆਰਡਰ ਇਤਿਹਾਸ
+        </h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Queue#</th>
+                <th>Date & Time</th>
+                <th>Customer</th>
+                <th>Material</th>
+                <th>In Weight</th>
+                <th>Out Weight</th>
+                <th>Income</th>
+                <th>Method</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. DATABASE MANAGEMENT & SYNC VIEW -->
+    <div id="dataSyncView" class="view-panel">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="card-title"><i data-lucide="database" style="color: var(--primary);"></i> Data Backup & Sync / ਡਾਟਾ ਬੈਕਅਪ</h2>
+          <button class="btn btn-secondary" onclick="switchView('dashboard')"><i data-lucide="arrow-left"></i> Home</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+          <!-- Sync controls -->
+          <div style="background: rgba(217, 119, 6, 0.05); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(217, 119, 6, 0.15);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; font-weight: 700; color: var(--primary);">Firebase Firestore Sync</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
+              Sync local mill data with the online cloud database to ensure records are safe. Changes are uploaded in the background. If you are offline, updates are queued and will sync when connection is restored.
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="triggerManualSync()"><i data-lucide="refresh-cw"></i> Sync Data Now</button>
+              <button class="btn btn-secondary" onclick="testFirebaseConnection()"><i data-lucide="radio"></i> Test Connection</button>
+            </div>
+          </div>
+
+          <!-- Backup controls -->
+          <div>
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; font-weight: 700;">Local JSON Backups</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
+              Download a complete offline copy of your flour mill logs. You can use this file to restore database records anytime.
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 2rem;">
+              <!-- Export -->
+              <button class="btn btn-secondary" onclick="downloadBackup()"><i data-lucide="download"></i> Download Backup (JSON)</button>
+              
+              <!-- Import -->
+              <label class="btn btn-secondary" style="cursor: pointer; margin: 0;">
+                <i data-lucide="upload"></i> Upload Backup
+                <input type="file" id="importFile" class="input-control" style="display: none;" accept=".json" onchange="uploadBackup(event)">
+              </label>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; font-weight: 700; color: var(--danger);">Danger Zone</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
+              Permanently clear the local database cache. All records stored on this device will be deleted. Make sure you have exported a backup JSON file before proceeding!
+            </p>
+            <div>
+              <button class="btn btn-danger" onclick="clearLocalDatabase()"><i data-lucide="trash-2"></i> Reset Local Database</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: ENTER FINAL WEIGHT -->
+  <div class="modal-overlay" id="weightModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Enter Final Weight</h3>
+        <button class="modal-close" onclick="closeWeightModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="weightModalForm">
+          <input type="hidden" id="modalOrderId">
+          
+          <div style="margin-bottom: 1rem; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 12px;">
+            <p style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text-muted);">Customer: <strong id="modalWeightCustomer" style="color: var(--text-main);"></strong></p>
+            <p style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text-muted);">Material: <strong id="modalWeightMaterial" style="color: var(--text-main);"></strong></p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Initial Weight: <strong id="modalWeightInitial" style="color: var(--text-main);"></strong> kg</p>
+          </div>
+
+          <div class="form-group">
+            <label for="finalWeight">Final Ground Weight (kg) *</label>
+            <input type="number" step="0.001" id="finalWeight" class="input-control" required placeholder="e.g. 48.700">
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Note: Final weight is usually slightly less than initial weight due to chaff/dust extraction.</p>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeWeightModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitFinalWeight()">Mark Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DISPATCH & PAYMENT -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Collect Payment & Out</h3>
+        <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentModalForm">
+          <input type="hidden" id="modalPaymentOrderId">
+          
+          <div style="margin-bottom: 1.5rem; background: rgba(0,0,0,0.1); padding: 12px; border-radius: 12px;">
+            <p style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text-muted);">Customer: <strong id="modalPaymentCustomer" style="color: var(--text-main);"></strong></p>
+            <p style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text-muted);">Material: <strong id="modalPaymentMaterial" style="color: var(--text-main);"></strong></p>
+            <p style="font-size: 0.9rem; margin-bottom: 4px; color: var(--text-muted);">Initial Weight: <strong id="modalPaymentInitial" style="color: var(--text-main);"></strong> kg</p>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Final Ground Weight: <strong id="modalPaymentFinal" style="color: var(--text-main);"></strong> kg</p>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label for="paymentAmount">Amount Charged (ਰਾਸ਼ੀ) *</label>
+            <input type="number" step="0.01" id="paymentAmount" class="input-control" required placeholder="Enter Rupees e.g. 150">
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMode">Payment Method (ਪੇਮੈਂਟ ਦਾ ਤਰੀਕਾ)</label>
+            <select id="paymentMode" class="input-control" required>
+              <option value="Cash">Cash (ਨਕਦ)</option>
+              <option value="Bank">Bank Transfer / UPI (ਬੈਂਕ ਖਾਤਾ / QR)</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePaymentModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitPaymentDispatch()">Dispatch & Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Overlay -->
+  <div id="toastContainer"></div>
+
+  <!-- Script Modules -->
+  <!-- Firebase Core SDK App -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+      }
+    }
+  </script>
+
+  <!-- Main JS Logic -->
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
